@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 const db = new Database('shop.db');
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages, GatewayIntentBits.GuildMembers] });
 
 // 데이터베이스 초기화
 function initDb() {
@@ -134,8 +134,12 @@ client.once('ready', async () => {
   try {
     const commands = loadCommands();
     const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
-    await rest.put(Routes.applicationCommands(client.user.id), { body: commands });
-    console.log('✅ 슬래시 명령어 등록 완료');
+    
+    // 모든 서버에 명령어 등록
+    for (const guild of client.guilds.cache.values()) {
+      await rest.put(Routes.applicationGuildCommands(client.user.id, guild.id), { body: commands });
+      console.log(`✅ ${guild.name}에 명령어 등록 완료`);
+    }
   } catch (error) {
     console.error('명령어 등록 실패:', error);
   }
