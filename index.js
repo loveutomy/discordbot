@@ -356,3 +356,4 @@ client.on('interactionCreate', async (interaction) => {
 
 initDb();
 client.login(process.env.DISCORD_TOKEN);
+
